@@ -21,6 +21,8 @@ class Window(QWidget):
         self.componentes = {}
         self.articulos = cargar_registros()
         self.tablahash = generar_tabla_hash(self.articulos)
+        self.mensaje = QMessageBox()
+        self.mensaje.setStyleSheet("background:white;"+"color:black;")
         
 
         self.show()
@@ -484,7 +486,8 @@ class Window(QWidget):
             "font-size:16px;"+
             "padding:6px;"+
             "color:white;"+
-            "background:rgba(0,0,140,1);"
+            "background:rgba(0,0,140,1);"+
+            "margin-top:10px;"
             )
 
         
@@ -694,7 +697,8 @@ class Window(QWidget):
             "margin:0 100px;"+
             "padding:8px;"+
             "font-size:16px;"+
-            "color:white;"
+            "color:white;"+
+            "background:rgba(0,0,140,1);"
         )
         boton_compra.clicked.connect(lambda:self.registrar_compra(leer_compra_referencia.text(),leer_cantidad_compra.text()))
         self.componentes["boton_compra"]  = boton_compra
@@ -759,7 +763,8 @@ class Window(QWidget):
             "margin:0 100px;"+
             "padding:8px;"+
             "font-size:16px;"+
-            "color:white;"
+            "color:white;"+
+            "background:rgba(0,0,140,1);"
         )
         boton_venta.clicked.connect(lambda:self.registrar_venta(leer_referencia_venta.text(),leer_cantidad_venta.text(),leer_fecha.text()))
         self.componentes["boton_venta"] = boton_venta
@@ -808,13 +813,20 @@ class Window(QWidget):
             articulos = [self.tablahash.buscar_elemento(referencia)[0]]
             self.mostrar_tabla(articulos)
         else:
-            print('No esiste')
+            self.mensaje.setText("Referencia Invalida")
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,'Error','Referencia Invalida')
+            
 
     def registrar_articulo(self,referencia,distribuidora,nombre_art,cantidad_art,precio,fecha):
         validar = validar_registro(referencia,distribuidora,nombre_art,cantidad_art,precio,fecha)
         if validar["status"]:
             if self.tablahash.buscar_elemento(referencia) != False:
-                QMessageBox.about(self,'Error',"El articulo ya se encuentra registrado, intente con otra referencia")
+                self.mensaje.setText("El articulo ya se encuentra registrado")
+                self.mensaje.setWindowTitle("Error")
+                self.mensaje.exec()
+                #QMessageBox.about(self,'Error',"El articulo ya se encuentra registrado, intente con otra referencia")
             else:
                 articulo = Articulo()
                 articulo.registrar_articulov2(referencia,distribuidora,nombre_art,cantidad_art,precio,fecha)
@@ -822,11 +834,17 @@ class Window(QWidget):
                 actualizar_archivo(self.tablahash)
                 self.articulos = cargar_registros()
                 self.tablahash = generar_tabla_hash(self.articulos)
-                QMessageBox.about(self,"Clear","Registro Exitoso")
+                self.mensaje.setText("Registro Exitoso")
+                self.mensaje.setWindowTitle("Papeleria")
+                self.mensaje.exec()
+                #QMessageBox.about(self,"Clear","Registro Exitoso")
                 self.mostrar_frame_agregar()
             
         else:
-            QMessageBox.about(self,"Error",validar["error_message"])
+            self.mensaje.setText(validar["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Error",validar["error_message"])
 
     
     def modificar_articulo_callback(self,referencia,distribuidora,nombre,cantidad,precio,fecha,indice):
@@ -838,16 +856,21 @@ class Window(QWidget):
             actualizar_archivo(self.tablahash)
             self.articulos = cargar_registros()
             self.tablahash = generar_tabla_hash(self.articulos)
-            QMessageBox.about(self,"Clear","Modificacion Exitosa!")
+            self.mensaje.setText("Modificacion Exitosa!")
+            self.mensaje.setWindowTitle("Papeleria")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Clear","Modificacion Exitosa!")
             self.mostrar_frame_modificar()
         else:
-            QMessageBox.about(self,"Error",validar["error_message"])
+            self.mensaje.setText(validar["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Error",validar["error_message"])
     def modificar_articulo(self,referencia,nueva_referencia,nueva_distribuidora,nuevo_nombre,nueva_cantidad,nuevo_precio,nueva_fecha,boton_modificar):
         validar = validar_cadena_alfanumerica(referencia.text(),10)
         if validar["status"]:
             if self.tablahash.buscar_elemento(referencia.text()) != False:
                 articulo,indice = self.tablahash.buscar_elemento(referencia.text())[0],self.tablahash.buscar_elemento(referencia.text())[1]
-
                 nueva_referencia.setEnabled(True),nueva_referencia.setText(articulo.referencia)
                 nueva_distribuidora.setEnabled(True),nueva_distribuidora.setText(articulo.distribuidora)
                 nuevo_nombre.setEnabled(True),nuevo_nombre.setText(articulo.nombre_art)
@@ -868,73 +891,127 @@ class Window(QWidget):
                     nueva_fecha.text(),
                     indice
                 ))
+            else:
+                self.mensaje.setText("Referencia Invalida")
+                self.mensaje.setWindowTitle("Error")
+                self.mensaje.exec()
         else:
-            QMessageBox.about(self,'Clear',validar["error_message"])
+            self.mensaje.setText(validar["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,'Clear',validar["error_message"])
 
     def eliminar_articulo(self,referencia):
         validar = validar_cadena_alfanumerica(referencia,10)
         if validar["status"]:
             if self.tablahash.buscar_elemento(referencia) != False:
-                indice = self.tablahash.buscar_elemento(referencia)[1]
-                self.tablahash.lista[indice[0]][indice[1]][1].referencia+='*'
-                actualizar_archivo(self.tablahash)
-                self.articulos = cargar_registros()
-                self.tablahash = generar_tabla_hash(self.articulos)
-                QMessageBox.about(self,"Clear","Articulo Eliminado")
-                self.mostrar_frame_eliminar()
+                self.mensaje.setText("Esta seguro que desea eliminar el articulo?")
+                self.mensaje.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                respuesta = self.mensaje.exec()
+                if respuesta == QMessageBox.Ok:
+                    self.mensaje.setStandardButtons(QMessageBox.Ok)
+                    indice = self.tablahash.buscar_elemento(referencia)[1]
+                    self.tablahash.lista[indice[0]][indice[1]][1].referencia+='*'
+                    actualizar_archivo(self.tablahash)
+                    self.articulos = cargar_registros()
+                    self.tablahash = generar_tabla_hash(self.articulos)
+                    self.mensaje.setText("Articulo Eliminado")
+                    self.mensaje.setWindowTitle("Papeleria")
+                    self.mensaje.exec()
+                    #QMessageBox.about(self,"Clear","Articulo Eliminado")
+                    self.mostrar_frame_eliminar()
             else:
-                QMessageBox.about(self,"Error","Referencia Invalida")
+                self.mensaje.setText("Referencia Invalida")
+                self.mensaje.setWindowTitle("Error")
+                self.mensaje.exec()
+                #QMessageBox.about(self,"Error","Referencia Invalida")
         else:
-            QMessageBox.about(self,"Error",validar["error_mesage"])
+            self.mensaje.setText(validar["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Error",validar["error_message"])
 
     def registrar_compra(self,referencia,cantidad_compra):
         validar_referencia = validar_cadena_alfanumerica(referencia,10)
         validar_cantidad = validar_entero_positivo(cantidad_compra)
         if validar_referencia["status"]:
             if validar_cantidad["status"]:
-                indice = self.tablahash.buscar_elemento(referencia)[1]
-                self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = int(self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art)
-                self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art+= int(cantidad_compra)
-                self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = str(self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art)
-                actualizar_archivo(self.tablahash)
-                self.articulos = cargar_registros()
-                self.tablahash = generar_tabla_hash(self.articulos)
-                QMessageBox.about(self,"Clear","Compra exitosa!")
-                self.mostrar_frame_compra__venta()
+                if self.tablahash.buscar_elemento(referencia) != False:
+                    indice = self.tablahash.buscar_elemento(referencia)[1]
+                    self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = int(self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art)
+                    self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art+= int(cantidad_compra)
+                    self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = str(self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art)
+                    actualizar_archivo(self.tablahash)
+                    self.articulos = cargar_registros()
+                    self.tablahash = generar_tabla_hash(self.articulos)
+                    self.mensaje.setText("Compra Exitosa!")
+                    self.mensaje.setWindowTitle("Papeleria")
+                    self.mensaje.exec()
+                    #QMessageBox.about(self,"Clear","Compra exitosa!")
+                    self.mostrar_frame_compra__venta()
+                else:
+                    self.mensaje.setText("El articulo no esta registrado")
+                    self.mensaje.setWindowTitle("Error")
+                    self.mensaje.exec()
             else:
-                QMessageBox.about(self,"Error",validar_cantidad["error_message"]) 
+                indice = self.tablahash.buscar_elemento(referencia)[1]
+                #QMessageBox.about(self,"Error",validar_cantidad["error_message"]) 
         else:
-            QMessageBox.about(self,"Error",validar_referencia["error_message"]) 
+            self.mensaje.setText(validar_referencia["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Error",validar_referencia["error_message"]) 
     def registrar_venta(self,referencia,cantidad_venta,fecha):
         validar_referencia = validar_cadena_alfanumerica(referencia,10)
         validar_cantidad = validar_entero_positivo(cantidad_venta)
         if validar_referencia["status"]:
             if validar_cantidad["status"]:
                 if validar_fecha(fecha)["status"]:
-                    indice = self.tablahash.buscar_elemento(referencia)[1]
-                    cantidad_actual = self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art
-                    cantidad_actual = int(cantidad_actual)
-                    cantidad_venta = int(cantidad_venta)
-                    if cantidad_actual < cantidad_venta:
-                        QMessageBox.about(self,"Error","No puedes vender mas de lo que tienes!")
+                    if self.tablahash.buscar_elemento(referencia) != False:
+                        indice = self.tablahash.buscar_elemento(referencia)[1]
+                        cantidad_actual = self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art
+                        cantidad_actual = int(cantidad_actual)
+                        cantidad_venta = int(cantidad_venta)
+                        if cantidad_actual < cantidad_venta:
+                            self.mensaje.setText("No puedes vender mas de lo que tienes!")
+                            self.mensaje.setWindowTitle("Error")
+                            self.mensaje.exec()
+                            #QMessageBox.about(self,"Error","No puedes vender mas de lo que tienes!")
+                        else:
+                            nueva_cantidad = cantidad_actual-cantidad_venta
+                            self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = str(nueva_cantidad)
+                            dia,mes,ano = fecha.split('/')
+                            self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Dia"] = dia
+                            self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Mes"] = mes
+                            self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Año"] = ano
+                            actualizar_archivo(self.tablahash)
+                            self.articulos = cargar_registros()
+                            self.tablahash = generar_tabla_hash(self.articulos)
+                            self.mensaje.setText("Venta Exitosa!")
+                            self.mensaje.setWindowTitle("Papeleria")
+                            self.mensaje.exec()
+                            #QMessageBox.about(self,"Error","Venta exitosa!")
+                            self.mostrar_frame_compra__venta()
                     else:
-                        nueva_cantidad = cantidad_actual-cantidad_venta
-                        self.tablahash.lista[indice[0]][indice[1]][1].cantidad_art = str(nueva_cantidad)
-                        dia,mes,ano = fecha.split('/')
-                        self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Dia"] = dia
-                        self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Mes"] = mes
-                        self.tablahash.lista[indice[0]][indice[1]][1].fecha_salida["Año"] = ano
-                        actualizar_archivo(self.tablahash)
-                        self.articulos = cargar_registros()
-                        self.tablahash = generar_tabla_hash(self.articulos)
-                        QMessageBox.about(self,"Error","Venta exitosa!")
-                        self.mostrar_frame_compra__venta()
+                        self.mensaje.setText("Referencia Invalida")
+                        self.mensaje.setWindowTitle("Error")
+                        self.mensaje.exec()
+                        #QMessageBox.about(self,"Error",validar_fecha(fecha)["error_message"])
                 else:
-                    QMessageBox.about(self,"Error",validar_fecha(fecha)["error_message"])
+                    self.mensaje.setText(validar_fecha(fecha)["error_message"])
+                    self.mensaje.setWindowTitle("Error")
+                    self.mensaje.exec()
+                    #QMessageBox.about(self,"Error",validar_fecha(fecha)["error_message"])
             else:
-                QMessageBox.about(self,"Error",validar_cantidad["error_message"])
+                self.mensaje.setText(validar_cantidad["error_message"])
+                self.mensaje.setWindowTitle("Error")
+                self.mensaje.exec()
+                #QMessageBox.about(self,"Error",validar_cantidad["error_message"])
         else:
-            QMessageBox.about(self,"Error",validar_referencia["error_message"])
+            self.mensaje.setText(validar_referencia["error_message"])
+            self.mensaje.setWindowTitle("Error")
+            self.mensaje.exec()
+            #QMessageBox.about(self,"Error",validar_referencia["error_message"])
 
     def mostrar_ventas_2020(self):
         ventas_2020 = []
