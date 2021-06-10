@@ -14,7 +14,7 @@ class Window(QWidget):
         self.setFont(QFont('Ubuntu'))
         self.setGeometry(200,100,1024,600)
         self.setStyleSheet(
-            "background:rgba(20,50,50,1)"
+            "background:rgba(20,50,50,1);"
         )
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
@@ -31,6 +31,7 @@ class Window(QWidget):
     def limpiar_frame(self):
         for comp in self.componentes:
             self.componentes[comp].hide()
+        self.componentes = {}
     
     #frame donde se cargan todos los componentes
     def frame_principal(self):
@@ -42,6 +43,7 @@ class Window(QWidget):
         )
         self.frame.setLayout(self.frame_principal_layout)
         self.frame.setFrameShape(QFrame.StyledPanel)
+        
         self.layout.addWidget(self.frame)
 
     #frame secundaria para el menu
@@ -119,16 +121,18 @@ class Window(QWidget):
             "padding:8px;"+
             "color:white;"
         )
-        #self.componentes["boton_consultar_articulo"] = boton_consultar_articulo
-        #self.componentes["boton_agregar_articulo"] = boton_agregar_articulo
-        #self.componentes["boton_modificar_articulo"] = boton_modificar_articulo
-        #self.componentes["boton_eliminar_articulo"] = boton_eliminar_articulo
-        #self.componentes["boton_compra_venta_articulo"] = boton_compra_venta_articulo
-        #self.componentes["boton_listar_articulo"] = boton_listar_articulo
+
+        boton_mostrar_inicio = QPushButton("Inicio")
+        boton_mostrar_inicio.clicked.connect(self.mostrar_frame_inicio)
+        boton_mostrar_inicio.setStyleSheet(
+            "background:rgba(60,150,0,1);"+
+            "padding:8px;"+
+            "color:white;"
+        )
+    
 
 
-
-
+        frame_botones_layout.addWidget(boton_mostrar_inicio)
         frame_botones_layout.addWidget(boton_consultar_articulo)
         frame_botones_layout.addWidget(boton_agregar_articulo)
         frame_botones_layout.addWidget(boton_modificar_articulo)
@@ -140,7 +144,98 @@ class Window(QWidget):
 
         self.layout.addWidget(self.frame_botones)
 
+    def frame_inicio(self):
+        header = QLabel()
+        header.setText("Inventario Papeleria")
+        header.setStyleSheet(
+            "color:white;"+
+            "font-size:48px;"+
+            "font-weight:bold;"
+        )
+        self.componentes["header"] = header
+
+        sub_header = QLabel()
+        sub_header.setText("Desarrolladores")
+        sub_header.setAlignment(Qt.AlignCenter)
+        sub_header.setStyleSheet(
+            "color:white;"+
+            "font-size:32px;"+
+            "font-weight:bold;"+
+            "margin:40px 0;"
+        )
+        self.componentes["sub_header"] = sub_header
+
+
+        imagen_1 = QPixmap('gamer.png')
+        label_imagen1 = QLabel()
+        label_imagen1.setPixmap(imagen_1)
+        label_imagen1.setAlignment(Qt.AlignCenter)
+        self.componentes["label_imagen1"] = label_imagen1
+
+        nombre_desarrollador1 = QLabel()
+        nombre_desarrollador1.setText("Cesar Zabala")
+        nombre_desarrollador1.setStyleSheet(
+            "color:white;"+
+            "font-size:24px;"+
+            "font-weight:bold;"
+        )
+        self.componentes["nombre_desarrollador1"] = nombre_desarrollador1
+
+        imagen_2 = QPixmap('programmer.png')
+        label_imagen2 = QLabel()
+        label_imagen2.setPixmap(imagen_2)
+        label_imagen2.setAlignment(Qt.AlignCenter)
+        self.componentes["label_imagen2"] = label_imagen2
+
+        nombre_desarrollador2 = QLabel()
+        nombre_desarrollador2.setText("Jesus Figuera")
+        nombre_desarrollador2.setStyleSheet(
+            "color:white;"+
+            "font-size:24px;"+
+            "font-weight:bold;"
+        )
+        self.componentes["nombre_desarrollador2"] = nombre_desarrollador2
+
+        imagen_3 = QPixmap('senior.png')
+        label_imagen3 = QLabel()
+        label_imagen3.setPixmap(imagen_3)
+        label_imagen3.setAlignment(Qt.AlignCenter)
+        self.componentes["label_imagen3"] = label_imagen3
+
+        nombre_desarrollador3 = QLabel()
+        nombre_desarrollador3.setText("Ulises Hernandez")
+        nombre_desarrollador3.setStyleSheet(
+            "color:white;"+
+            "font-size:24px;"+
+            "font-weight:bold;"
+        )
+        self.componentes["nombre_desarrollador3"] = nombre_desarrollador3
+
+        
+        footer = QLabel()
+        footer.setText("UDO - Nueva Esparta")
+        footer.setStyleSheet(
+            "font-size:24px;"+
+            "color:white;"+
+            "margin-top:150px;"+
+            "font-weight:bold;"
+        )
+        footer.setAlignment(Qt.AlignCenter)
+        self.componentes["footer"] = footer
+        
+        self.frame_principal_layout.addWidget(self.componentes["header"],0,0,1,3)
+        self.frame_principal_layout.addWidget(self.componentes["sub_header"],1,0,1,3)
+        self.frame_principal_layout.addWidget(self.componentes["label_imagen1"],2,0)
+        self.frame_principal_layout.addWidget(self.componentes["label_imagen2"],2,1)
+        self.frame_principal_layout.addWidget(self.componentes["label_imagen3"],2,2)
+        self.frame_principal_layout.addWidget(self.componentes["nombre_desarrollador1"],3,0)
+        self.frame_principal_layout.addWidget(self.componentes["nombre_desarrollador2"],3,1)
+        self.frame_principal_layout.addWidget(self.componentes["nombre_desarrollador3"],3,2)
+        self.frame_principal_layout.addWidget(self.componentes["footer"],4,0,1,3)
+        self.frame_principal_layout.setRowStretch(10,2)
+    
     #frame para consultar un articulo
+    
     def frame_consulta(self):
         header = QLabel()
         header.setText("Consultar Articulo")
@@ -353,7 +448,7 @@ class Window(QWidget):
             "padding:6px;"+
             "font-size:16px;"
         )
-        boton_volver.clicked.connect(self.mostrar_frame_consulta)
+        boton_volver.clicked.connect(self.mostrar_frame_inicio)
         boton_volver.setStyleSheet(
             "margin-right:650px;"+
             "margin-top:20px;"+
@@ -807,7 +902,9 @@ class Window(QWidget):
     def mostrar_frame_compra__venta(self):
         self.limpiar_frame()
         self.frame_compra_venta()
-
+    def mostrar_frame_inicio(self):
+        self.limpiar_frame()
+        self.frame_inicio()
     def buscar_articulo(self,referencia):
         if self.tablahash.buscar_elemento(referencia) != False:
             articulos = [self.tablahash.buscar_elemento(referencia)[0]]
@@ -1074,4 +1171,5 @@ def run_app():
     window = Window()
     window.frame_principal()
     window.frame_botones()
+    window.mostrar_frame_inicio()
     sys.exit(app.exec())
